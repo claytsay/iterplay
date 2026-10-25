@@ -10,7 +10,8 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "google-genai>=1.0",
-    "playwright>=1.45",
+    "httpx>=0.28",
+    "playwright>=1.48",
     "pydantic>=2.11",
     "python-dotenv>=1.0",
     "PyYAML>=6.0",
@@ -55,5 +56,10 @@ init_typed = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = ["-ra", "--strict-markers"]
+markers = [
+    "browser: launches Playwright Chromium (skipped when it is not installed)",
+    "ffmpeg: needs ffmpeg and ffprobe on PATH (skipped otherwise)",
+    "slow: takes more than about 20 seconds",
+]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"

@@ -34,6 +34,13 @@ KILL_PLANE_Y: Final = -20.0
 """Height below which the player is out of bounds: games emit ``oob`` and respawn the player."""
 
 
+class _HarnessModel(TolerantModel):
+    """Data a game reports. Numbers must be finite: a NaN or infinite value fails validation,
+    so a game reporting one fails its smoke test with a clear schema error."""
+
+    model_config = ConfigDict(allow_inf_nan=False)
+
+
 class GameEventType(StrEnum):
     DEATH = "death"
     COLLECT = "collect"
@@ -42,7 +49,7 @@ class GameEventType(StrEnum):
     OOB = "oob"
 
 
-class GameEvent(TolerantModel):
+class GameEvent(_HarnessModel):
     """A discrete event that happened since the previous ``getState()`` call.
 
     Event-specific extra fields are preserved rather than dropped.
@@ -59,7 +66,7 @@ class GameEvent(TolerantModel):
     )
 
 
-class Vec3(TolerantModel):
+class Vec3(_HarnessModel):
     """A point in world space. +y is up; 2D games leave z at 0."""
 
     x: float
@@ -67,7 +74,7 @@ class Vec3(TolerantModel):
     z: float = 0.0
 
 
-class PlayerState(TolerantModel):
+class PlayerState(_HarnessModel):
     """Player position, velocity, and whether they are standing on something."""
 
     x: float
@@ -79,7 +86,7 @@ class PlayerState(TolerantModel):
     grounded: bool
 
 
-class Collectible(TolerantModel):
+class Collectible(_HarnessModel):
     model_config = ConfigDict(coerce_numbers_to_str=True)
 
     id: str
@@ -89,7 +96,7 @@ class Collectible(TolerantModel):
     collected: bool
 
 
-class GameState(TolerantModel):
+class GameState(_HarnessModel):
     """One ``getState()`` snapshot. Field names match the JavaScript contract on the wire."""
 
     model_config = ConfigDict(

@@ -1,6 +1,7 @@
 """URL parameters every generated game must honour (HLD §3.2)."""
 
 from dataclasses import dataclass
+from urllib.parse import urlencode
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,6 +23,13 @@ class GameUrlParams:
     def to_query(self) -> str:
         """Encode as a query string, e.g. ``seed=7&fixedStep=1&harness=1&bot=newbie``.
 
-        Disabled flags are omitted rather than sent as ``0``.
+        Disabled flags are omitted rather than sent as ``0``, and so is a ``None`` bot.
         """
-        raise NotImplementedError
+        params = [("seed", str(self.seed))]
+        if self.fixed_step:
+            params.append(("fixedStep", "1"))
+        if self.harness_hud:
+            params.append(("harness", "1"))
+        if self.bot is not None:
+            params.append(("bot", self.bot))
+        return urlencode(params)

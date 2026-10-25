@@ -1,5 +1,7 @@
 """Model-facing and on-disk schemas match HLD §4 and §6."""
 
+import json
+import math
 from typing import Any
 
 import pytest
@@ -9,6 +11,7 @@ from iterplay.contract.state import GameState
 from iterplay.models.critique import Critique, EvidenceType
 from iterplay.models.game import BuilderResponse, FixerResponse
 from iterplay.models.playtest import BotName
+from iterplay.models.run import RunSummary
 from iterplay.models.smoke import SmokeReport
 from iterplay.models.telemetry import TelemetryRecord
 
@@ -51,3 +54,14 @@ def test_telemetry_record_keeps_javascript_field_names(hld_state: dict[str, Any]
 def test_artifacts_reject_unknown_fields() -> None:
     with pytest.raises(ValidationError):
         SmokeReport.model_validate({"passed": True, "checks": [], "attempt": 1, "extra": 1})
+
+
+def test_artifacts_keep_non_finite_floats_as_valid_json() -> None:
+    summary = RunSummary(run_id="r", spend_usd=float("nan"), duration_s=float("inf"))
+
+    text = summary.model_dump_json()
+    reloaded = RunSummary.model_validate_json(text)
+
+    assert (json.loads(text)["spend_usd"], json.loads(text)["duration_s"]) == ("NaN", "Infinity")
+    assert reloaded.spend_usd is not None and math.isnan(reloaded.spend_usd)
+    assert reloaded.duration_s == float("inf")

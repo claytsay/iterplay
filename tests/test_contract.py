@@ -94,3 +94,18 @@ def test_allowlist_accepts_flat_game_files(path: str) -> None:
 )
 def test_allowlist_rejects_everything_else(path: str) -> None:
     assert ALLOWED_PATH.fullmatch(path) is None
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"player": {"x": float("nan"), "y": 0, "vx": 0, "vy": 0, "grounded": True}},
+        {"fps": float("inf")},
+        {"goal": {"x": 1, "y": float("-inf")}},
+    ],
+)
+def test_game_state_rejects_non_finite_numbers(
+    hld_state: dict[str, Any], change: dict[str, Any]
+) -> None:
+    with pytest.raises(ValidationError):
+        GameState.model_validate({**hld_state, **change})

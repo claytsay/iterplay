@@ -1,8 +1,47 @@
-"""Shared fixtures: the example payloads printed in the HLD, used as contract fixtures."""
+"""Shared fixtures, and skipping of tests whose external tools are missing.
 
+The HLD's example payloads are used as contract fixtures. Tests marked ``browser`` or
+``ffmpeg`` are skipped when Playwright's Chromium or ffmpeg/ffprobe are not installed.
+"""
+
+import shutil
+from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 import pytest
+
+
+def _chromium_installed() -> bool:
+    try:
+        from playwright.sync_api import sync_playwright
+
+        with sync_playwright() as playwright:
+            return Path(playwright.chromium.executable_path).exists()
+    except Exception:
+        return False
+
+
+def _ffmpeg_installed() -> bool:
+    return shutil.which("ffmpeg") is not None and shutil.which("ffprobe") is not None
+
+
+_TOOL_PROBES: dict[str, Callable[[], bool]] = {
+    "browser": _chromium_installed,
+    "ffmpeg": _ffmpeg_installed,
+}
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    available: dict[str, bool] = {}
+    for item in items:
+        for marker, probe in _TOOL_PROBES.items():
+            if item.get_closest_marker(marker) is None:
+                continue
+            if marker not in available:
+                available[marker] = probe()
+            if not available[marker]:
+                item.add_marker(pytest.mark.skip(reason=f"needs {marker}, which is not installed"))
 
 
 @pytest.fixture

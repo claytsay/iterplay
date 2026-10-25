@@ -31,14 +31,22 @@ class KeepBestPolicy:
 
     @property
     def best_version(self) -> int | None:
-        raise NotImplementedError
+        """The best booted version so far, the newest among equals; None until one boots."""
+        return None if self._best is None else self._best[0]
 
     @property
     def best_score(self) -> float | None:
-        raise NotImplementedError
+        """Total score of :attr:`best_version`."""
+        return None if self._best is None else self._best[1]
 
     def record(self, score: ScoreCard, *, booted: bool) -> KeepBestDecision:
-        raise NotImplementedError
+        """Decide the outcome of the newest version and where the next fix starts."""
+        if booted and (self._best is None or score.total >= self._best[1]):
+            self._best = (score.version, score.total)
+            return KeepBestDecision(outcome=VersionOutcome.ACCEPTED, base_version=score.version)
+        outcome = VersionOutcome.REVERTED if booted else VersionOutcome.BUILD_FAILED
+        base_version = score.version if self._best is None else self._best[0]
+        return KeepBestDecision(outcome=outcome, base_version=base_version)
 
 
 class StopPolicy:
@@ -59,5 +67,16 @@ class StopPolicy:
         self._started_at = clock()
 
     def check(self, *, versions_built: int, best_score: float | None) -> StopReason | None:
-        """Why to stop now, or None to keep iterating. Called after every version."""
-        raise NotImplementedError
+        """Why to stop now, or None to keep iterating. Called after every version.
+
+        When several reasons apply, the first of these wins: the target, the iteration limit,
+        the wall-time budget (measured from construction), then the token and spend budgets.
+        """
+        if best_score is not None and best_score >= self._target:
+            return StopReason.TARGET_REACHED
+        if versions_built >= self._budgets.max_iterations:
+            return StopReason.MAX_ITERATIONS
+        max_wall_time_s = self._budgets.max_wall_time_s
+        if max_wall_time_s is not None and self._clock() - self._started_at >= max_wall_time_s:
+            return StopReason.TIME_BUDGET
+        return self._meter.exhausted()

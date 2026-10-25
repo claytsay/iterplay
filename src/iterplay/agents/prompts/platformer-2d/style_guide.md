@@ -3,3 +3,4 @@
 - Keep the scene light: share materials and instance repeated tiles. Headless browsers render WebGL in software.
 - Make the player, collectibles, hazards and goal clearly distinct in shape and colour. A critic watches the game at 640x360.
 - Follow the player horizontally, and keep enough height in view to see a whole jump and what lies below it.
+- Draw the HUD as HTML text over the canvas, and keep the top-left corner clear: the recordings get a label burned in there.

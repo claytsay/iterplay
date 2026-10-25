@@ -3,12 +3,14 @@
 import argparse
 import asyncio
 import logging
+import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Final
 
 from iterplay import __version__, app
 from iterplay.contract.templates import DEFAULT_TEMPLATE, TEMPLATES, TemplateId
+from iterplay.errors import IterplayError
 from iterplay.models.run import CriticBackendKind
 from iterplay.settings import load_settings
 
@@ -42,6 +44,11 @@ def build_parser() -> argparse.ArgumentParser:
         choices=list(CriticBackendKind),
         default=CriticBackendKind.DIRECT,
         help="critic backend (default: %(default)s)",
+    )
+    new.add_argument(
+        "--personas",
+        action="store_true",
+        help="one critic per bot plus a lead designer, instead of one critic for the whole video",
     )
     new.add_argument(
         "--template",
@@ -79,13 +86,18 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    """Run one command. Problems the user can fix print ``error: <message>`` and exit 1."""
     args = build_parser().parse_args(argv)
     logging.basicConfig(
         level=logging.DEBUG if args.verbose else logging.INFO,
         format="%(levelname)s %(name)s: %(message)s",
     )
     handler: Callable[[argparse.Namespace], int] = args.handler
-    return handler(args)
+    try:
+        return handler(args)
+    except IterplayError as error:
+        print(f"error: {error}", file=sys.stderr)
+        return 1
 
 
 def _new(args: argparse.Namespace) -> int:
@@ -97,6 +109,7 @@ def _new(args: argparse.Namespace) -> int:
         headless=not args.headed,
         template=args.template,
         run_id=args.run_id,
+        per_persona=args.personas,
     )
     asyncio.run(app.new_run(options, load_settings()))
     return 0

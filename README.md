@@ -4,7 +4,7 @@ Iterplay turns a design doc into a browser game (for now, a single-level 2D plat
 
 Design: [docs/iterplay_high_level_design.md](docs/iterplay_high_level_design.md). Code comments cite it as "HLD", e.g. `HLD §4 [6]`.
 
-> **Status: skeleton.** Every component, data contract and CLI command in the HLD exists with typed signatures and docstrings. Behaviour is stubbed with `NotImplementedError`.
+> **Status: working MVP.** The whole loop of HLD §2 runs end to end on the 2D platformer template: the Builder, the smoke test with quick Fixer retries, three recorded bot playtests, media prep, the critic, the Verifier, the Scorer with keep-best and reverts, and the Fixer. Every artifact in HLD §6 is written as it is produced, and every model call is cached in its version's `llm/`. `play`, `replay` and `view` work on finished runs. Not built yet: the Managed Agents critic (`--critic managed` stops with a config error), a CLI switch for the direct critic's persona mode, 3D templates, and the stretch goals in HLD §13.
 
 ## Layout
 
@@ -69,6 +69,15 @@ iterplay play runs/<id>/v3   # play a version by hand
 iterplay replay runs/<id>    # step through a cached run without calling the API
 iterplay view                # serve the viewer on 127.0.0.1
 ```
+
+- **`iterplay new`** writes everything under `runs/<id>/`. The id is the UTC start time plus the design doc's name, e.g. `20261025-143000-tunnel-turbulence`; `--run-id` sets it. The run stops when a version reaches the rubric's target, after `--iters` versions, or when a budget runs out. Progress is logged; add `-v` for debug output. `--headed` runs the playtests in a visible browser with GPU WebGL, which is the only way `performance` gets scored. Before anything is created, it checks the design doc, the rubric, `GEMINI_API_KEY`, ffmpeg and the game port (8737 by default), and fails with a message if one is unusable.
+- **`iterplay play`** takes a version directory or any game directory with an `index.html`, such as `examples/reference_game`. It serves the game on 127.0.0.1, port 8737 by default, and opens it in your browser in real time, without the harness HUD. `--seed` picks the level seed. Press Ctrl-C to stop.
+- **`iterplay replay`** prints each version's score and outcome, its verified issues (including the critic's claims that telemetry contradicted) and its patch notes. Press Enter to advance, or use `--auto SECONDS`. Press Ctrl-D or Ctrl-C to stop early. It reads only files on disk.
+- **`iterplay view`** refreshes `runs/index.json` and serves the viewer at `http://127.0.0.1:8738/` (by default) until Ctrl-C.
+
+A version that never boots after two quick fixes scores 0 and counts as a failed build. A version that scores below the best so far is reverted: the next fix starts from the best version, with the failed attempt attached as "what not to do". If the critic fails, the version is scored on telemetry alone. `summary.json` is rewritten after every version, so a run that crashes still replays and shows in the viewer up to its last finished version.
+
+Settings come from the environment or `.env`: `GEMINI_API_KEY`, plus the optional `ITERPLAY_MODEL`, `ITERPLAY_RUNS_DIR`, `ITERPLAY_GAME_PORT` and `ITERPLAY_VIEWER_PORT`.
 
 ## Development
 

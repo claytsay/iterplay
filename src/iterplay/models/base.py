@@ -1,4 +1,8 @@
-"""Base classes for every pydantic model in iterplay."""
+"""Base classes for every pydantic model in iterplay.
+
+Both bases write non-finite floats as the JSON strings "NaN", "Infinity" and "-Infinity",
+which read back as floats, so an artifact that holds one stays valid JSON and still loads.
+"""
 
 from pydantic import BaseModel, ConfigDict
 
@@ -9,7 +13,7 @@ class StrictModel(BaseModel):
     Unknown fields are rejected, so schema drift between stages fails loudly.
     """
 
-    model_config = ConfigDict(frozen=True, extra="forbid")
+    model_config = ConfigDict(frozen=True, extra="forbid", ser_json_inf_nan="strings")
 
 
 class TolerantModel(BaseModel):
@@ -19,4 +23,4 @@ class TolerantModel(BaseModel):
     Required fields and types are still enforced.
     """
 
-    model_config = ConfigDict(frozen=True, extra="ignore")
+    model_config = ConfigDict(frozen=True, extra="ignore", ser_json_inf_nan="strings")

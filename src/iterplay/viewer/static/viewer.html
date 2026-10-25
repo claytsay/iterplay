@@ -2,68 +2,79 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <!-- Only this page's own script, styles and the run artifacts may load: no external
+       resources, no inline script, and no markup from data (see viewer.js). -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self';
+                 media-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>iterplay viewer</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 1400px; padding: 1rem; }
-    #videos { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    video { width: 100%; background: #000; }
-  </style>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="viewer.css">
+  <script type="module" src="viewer.js"></script>
 </head>
 <body>
   <header>
     <h1>iterplay</h1>
-    <label>Run <select id="run-select"></select></label>
+    <label>Run <select id="run-select" disabled></select></label>
+    <p id="run-meta"></p>
   </header>
 
-  <main>
-    <!-- Version timeline (v1 ... vN) with a score sparkline. -->
-    <section id="timeline" aria-label="Version timeline"></section>
+  <noscript><p>The viewer needs JavaScript.</p></noscript>
+  <p id="status" role="status" aria-live="polite">Loading runs…</p>
 
-    <!-- v1 and the selected version, side by side. -->
-    <section id="videos" aria-label="First and selected version">
-      <video id="video-first" controls muted></video>
-      <video id="video-current" controls muted></video>
+  <main id="run" hidden>
+    <!-- Version timeline (v1 ... vN) with a score sparkline. -->
+    <section id="timeline" aria-labelledby="timeline-heading">
+      <h2 id="timeline-heading">Versions</h2>
+      <div id="sparkline"></div>
+      <ol id="versions"></ol>
     </section>
 
-    <!-- Verified issues. Clicking a timestamp seeks the matching video;
-         contradicted claims are listed as caught hallucinations. -->
-    <section id="issues" aria-label="Verified issues"></section>
+    <!-- v1 and the selected version, side by side, for one bot. -->
+    <section id="playtests" aria-labelledby="playtests-heading">
+      <div class="section-head">
+        <h2 id="playtests-heading">Playtests</h2>
+        <label>Bot <select id="bot-select"></select></label>
+        <button id="play-both" type="button">Play both</button>
+      </div>
+      <div id="videos">
+        <figure id="slot-first" class="slot">
+          <figcaption></figcaption>
+          <video id="video-first" controls muted playsinline preload="metadata" hidden></video>
+          <p class="placeholder"></p>
+        </figure>
+        <figure id="slot-current" class="slot">
+          <figcaption></figcaption>
+          <video id="video-current" controls muted playsinline preload="metadata" hidden></video>
+          <p class="placeholder"></p>
+        </figure>
+      </div>
+    </section>
 
-    <!-- Patch notes (changelog.md) for the selected version. -->
-    <section id="patch-notes" aria-label="Patch notes"></section>
+    <div class="details">
+      <!-- Verified issues. Clicking a timestamp seeks the selected version's video;
+           contradicted claims are listed as caught hallucinations. -->
+      <section id="issues" aria-labelledby="issues-heading">
+        <h2 id="issues-heading">Verified issues</h2>
+        <div id="issue-list"></div>
+      </section>
+
+      <div class="side">
+        <!-- Patch notes (changelog.md) for the selected version. -->
+        <section id="patch-notes" aria-labelledby="patch-notes-heading">
+          <h2 id="patch-notes-heading">Patch notes</h2>
+          <div id="patch-notes-body"></div>
+        </section>
+
+        <!-- The selected version's score.json, item by item. -->
+        <section id="score" aria-labelledby="score-heading">
+          <h2 id="score-heading">Score</h2>
+          <div id="score-body"></div>
+        </section>
+      </div>
+    </div>
   </main>
-
-  <script type="module">
-    // Every input is a static file served by `iterplay view`:
-    //   runs/index.json                       RunIndex
-    //   runs/<id>/summary.json                RunSummary
-    //   runs/<id>/vN/score.json               ScoreCard
-    //   runs/<id>/vN/critique.verified.json   VerifiedCritique
-    //   runs/<id>/vN/changelog.md             patch notes
-    //   runs/<id>/vN/playtest/<bot>.webm      recordings
-
-    async function loadJson(path) {
-      throw new Error(`TODO: fetch and parse ${path}`);
-    }
-
-    function renderTimeline(summary, onSelectVersion) {
-      throw new Error("TODO: version timeline with score sparkline");
-    }
-
-    function renderVideos(runId, firstVersion, currentVersion, bot) {
-      throw new Error("TODO: side-by-side v1 and current videos");
-    }
-
-    function renderIssues(verified, onSeek) {
-      throw new Error("TODO: verified issues with clickable timestamps");
-    }
-
-    function renderPatchNotes(markdown) {
-      throw new Error("TODO: patch notes for the selected version");
-    }
-
-    // TODO: fill #run-select from runs/index.json, then render the selected run.
-  </script>
 </body>
 </html>
