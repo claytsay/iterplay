@@ -1,0 +1,27 @@
+# Secrets: never commit (HLD §9)
+.env
+.env.*
+!.env.example
+
+# Run artifacts: commit only the curated demo run (HLD §8)
+runs/*
+!runs/demo/
+
+# Three.js copied in by hand to run the reference level
+examples/reference_game/vendor/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+build/
+dist/
+.coverage
+htmlcov/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# macOS
+.DS_Store

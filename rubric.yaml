@@ -1,0 +1,53 @@
+# Scoring rubric (HLD §4 [7]). Weights are relative; the score is their weighted mean.
+# Objective items must use an id from iterplay.models.rubric.RubricItemId.
+target: 0.9
+
+items:
+  - id: boots_cleanly
+    description: Every smoke-test check passes.
+    source: smoke
+    weight: 15
+
+  - id: no_runtime_errors
+    description: No uncaught errors across all runs.
+    source: console
+    weight: 10
+
+  - id: completable
+    description: The Speedrunner completes the level.
+    source: telemetry
+    weight: 20
+
+  - id: collectibles_reachable
+    description: Every collectible is collected by at least one bot.
+    source: telemetry
+    weight: 10
+
+  - id: collision_integrity
+    description: No out-of-bounds events except falls into intentional pits.
+    source: telemetry
+    weight: 10
+
+  - id: fair_difficulty
+    description: The Newbie completes the level, or dies at most max_deaths times in 60 s.
+    source: telemetry
+    weight: 10
+    params:
+      max_deaths: 3
+
+  - id: performance
+    description: Minimum FPS of at least min_fps in a headed run.
+    source: telemetry
+    weight: 5
+    params:
+      min_fps: 30
+
+  - id: matches_design_doc
+    description: The critic's verified 0-5 rating of how well the game matches the design doc.
+    source: critic
+    weight: 15
+
+  - id: game_feel
+    description: The critic's 0-5 rating of game feel. Unverifiable, so weighted lower.
+    source: critic
+    weight: 5

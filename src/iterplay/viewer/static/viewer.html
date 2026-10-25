@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>iterplay viewer</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 1400px; padding: 1rem; }
+    #videos { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    video { width: 100%; background: #000; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>iterplay</h1>
+    <label>Run <select id="run-select"></select></label>
+  </header>
+
+  <main>
+    <!-- Version timeline (v1 ... vN) with a score sparkline. -->
+    <section id="timeline" aria-label="Version timeline"></section>
+
+    <!-- v1 and the selected version, side by side. -->
+    <section id="videos" aria-label="First and selected version">
+      <video id="video-first" controls muted></video>
+      <video id="video-current" controls muted></video>
+    </section>
+
+    <!-- Verified issues. Clicking a timestamp seeks the matching video;
+         contradicted claims are listed as caught hallucinations. -->
+    <section id="issues" aria-label="Verified issues"></section>
+
+    <!-- Patch notes (changelog.md) for the selected version. -->
+    <section id="patch-notes" aria-label="Patch notes"></section>
+  </main>
+
+  <script type="module">
+    // Every input is a static file served by `iterplay view`:
+    //   runs/index.json                       RunIndex
+    //   runs/<id>/summary.json                RunSummary
+    //   runs/<id>/vN/score.json               ScoreCard
+    //   runs/<id>/vN/critique.verified.json   VerifiedCritique
+    //   runs/<id>/vN/changelog.md             patch notes
+    //   runs/<id>/vN/playtest/<bot>.webm      recordings
+
+    async function loadJson(path) {
+      throw new Error(`TODO: fetch and parse ${path}`);
+    }
+
+    function renderTimeline(summary, onSelectVersion) {
+      throw new Error("TODO: version timeline with score sparkline");
+    }
+
+    function renderVideos(runId, firstVersion, currentVersion, bot) {
+      throw new Error("TODO: side-by-side v1 and current videos");
+    }
+
+    function renderIssues(verified, onSeek) {
+      throw new Error("TODO: verified issues with clickable timestamps");
+    }
+
+    function renderPatchNotes(markdown) {
+      throw new Error("TODO: patch notes for the selected version");
+    }
+
+    // TODO: fill #run-select from runs/index.json, then render the selected run.
+  </script>
+</body>
+</html>

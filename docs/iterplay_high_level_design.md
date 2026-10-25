@@ -6,6 +6,8 @@
 - **Target:** one MacBook-class laptop, a 6.5-hour build, and a live 3-minute demo
 - **Only cloud dependency:** the Gemini API. Everything else (game server, browsers, recording, scoring, viewer) runs locally.
 
+> **Update (2026-10-25): the current target is a single-level 2D platformer.** 3D stays possible through game templates (`src/iterplay/contract/templates.py`) but is not built yet. Where this document assumes 3D (§1's genre template, the `z` fields in §3.3, the controls in §3.4, and "move forward" in §4 [2]), the `platformer-2d` template applies instead. Its levels lie in the x/y plane, and 2D games may omit `z`. Left/Right or A/D run, Space, Up or W jump, and R respawns. The smoke test holds Right. See the README's "Game templates" section.
+
 ---
 
 ## 1. Goals and non-goals
@@ -247,7 +249,7 @@ runs/<run_id>/
 ## 7. CLI
 
 ```bash
-iterplay new  --doc examples/sky_islands.md --rubric rubric.yaml --iters 5
+iterplay new  --doc examples/tunnel_turbulence.md --rubric rubric.yaml --iters 5
 iterplay play runs/<id>/v3          # open a version in a normal browser to play by hand
 iterplay replay runs/<id>           # demo fallback: step through cached iterations
 iterplay view                       # serve viewer.html on 127.0.0.1
